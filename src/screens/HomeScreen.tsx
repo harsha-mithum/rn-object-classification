@@ -5,6 +5,7 @@ import styles from "@/constants/styles";
 import { Feather } from "@expo/vector-icons";
 import React from "react";
 import { Animated, Text, TouchableOpacity, View } from "react-native";
+import LottieView from "lottie-react-native";
 
 const HomeScreen = ({
   onImageSelect,
@@ -15,6 +16,14 @@ const HomeScreen = ({
 }) => (
   <Animated.View style={styles.homeContainer}>
     <Header title="Image Classifier" onBack={() => {}} />
+
+    <LottieView
+      source={require("@/assets/loader.json")}
+      autoPlay
+      loop
+      style={{ height: 200, width: 200, margin: 20 }}
+    />
+
     <View style={styles.card}>
       <Text style={styles.subtitle}>
         Upload an image or use your camera to identify objects.

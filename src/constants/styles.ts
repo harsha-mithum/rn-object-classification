@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   },
   resultScreen: {
     padding: 16,
-    marginTop: 30,
+    marginBottom: 30,
   },
   header: {
     width: "100%",
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
     color: COLORS.slate800,
   },

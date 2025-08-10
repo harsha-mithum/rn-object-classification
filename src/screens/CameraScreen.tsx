@@ -1,10 +1,12 @@
 import CameraControlButton from "@/components/CameraControlButton";
+import Header from "@/components/Header";
+import COLORS from "@/constants/colors";
 import { useCapture } from "@/hooks/useCapture";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { CameraCapturedPicture, CameraType, CameraView } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import React from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 
 type CameraScreenProps = {
   onCapture?: (
@@ -34,10 +36,36 @@ export const CameraScreen = ({
   if (!permission.granted) {
     return (
       <View style={styles.centeredContainer}>
+        <Header title="" onBack={()=>{}}/>
         <Text style={styles.message}>
           We need your permission to use the camera
         </Text>
-        <Button onPress={requestPermission} title="Grant Permission" />
+        <TouchableOpacity
+          style={[
+            {
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: COLORS.teal500,
+              paddingVertical: 16,
+              borderRadius: 12,
+              marginBottom: 16,
+              marginTop: 32,
+              paddingHorizontal:10,
+            },
+          ]}
+          onPress={requestPermission}
+        >
+          <Text
+            style={{
+              color: COLORS.white,
+              fontSize: 16,
+              fontWeight: "600",
+            }}
+          >
+            Grant Permission
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   }
