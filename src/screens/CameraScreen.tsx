@@ -6,18 +6,20 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { CameraCapturedPicture, CameraType, CameraView } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import React from "react";
-import { Button, StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type CameraScreenProps = {
   onCapture?: (
     image: ImagePicker.ImagePickerAsset | CameraCapturedPicture
   ) => void;
   initialFacing?: CameraType;
+  onReset: () => void;
 };
 
 export const CameraScreen = ({
   onCapture,
   initialFacing = "back",
+  onReset,
 }: CameraScreenProps) => {
   const {
     cameraRef,
@@ -35,37 +37,41 @@ export const CameraScreen = ({
 
   if (!permission.granted) {
     return (
-      <View style={styles.centeredContainer}>
-        <Header title="" onBack={()=>{}}/>
-        <Text style={styles.message}>
-          We need your permission to use the camera
-        </Text>
-        <TouchableOpacity
-          style={[
-            {
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: COLORS.teal500,
-              paddingVertical: 16,
-              borderRadius: 12,
-              marginBottom: 16,
-              marginTop: 32,
-              paddingHorizontal:10,
-            },
-          ]}
-          onPress={requestPermission}
-        >
-          <Text
-            style={{
-              color: COLORS.white,
-              fontSize: 16,
-              fontWeight: "600",
-            }}
-          >
-            Grant Permission
+      <View
+        style={{ flex: 1, backgroundColor: COLORS.slate100, marginTop: 40 }}
+      >
+        <Header title="Permission Required" onBack={onReset} showBack />
+        <View style={styles.centeredContainer}>
+          <Text style={styles.message}>
+            We need your permission to use the camera
           </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              {
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: COLORS.teal500,
+                paddingVertical: 16,
+                borderRadius: 12,
+                marginBottom: 16,
+                marginTop: 32,
+                paddingHorizontal: 40,
+              },
+            ]}
+            onPress={requestPermission}
+          >
+            <Text
+              style={{
+                color: COLORS.white,
+                fontSize: 16,
+                fontWeight: "600",
+              }}
+            >
+              Grant Permission
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }

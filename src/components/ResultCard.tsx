@@ -3,7 +3,13 @@ import { Feather } from "@expo/vector-icons";
 import { useMemo } from "react";
 import { Text, View } from "react-native";
 
-const ResultCard = ({ label, score, isTopResult }) => {
+type ResultCardProps = {
+  label: string;
+  score: number;
+  isTopResult: boolean;
+};
+
+const ResultCard: React.FC<ResultCardProps> = ({ label, score, isTopResult }) => {
   const percentage = useMemo(() => Math.round(score * 100), [score]);
   return (
     <View style={[styles.resultCard, isTopResult && styles.topResultCard]}>

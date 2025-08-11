@@ -1,9 +1,15 @@
 import styles from "@/constants/styles";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { GestureResponderEvent, Text, TouchableOpacity, View } from "react-native";
 
-const Header = ({ title, onBack, showBack = false }) => (
+type HeaderProps = {
+  title: string;
+  onBack: (event: GestureResponderEvent) => void;
+  showBack?: boolean;
+};
+
+const Header: React.FC<HeaderProps> = ({ title, onBack, showBack = false }) => (
   <View style={styles.header}>
     {showBack && (
       <TouchableOpacity onPress={onBack} style={styles.backButton}>

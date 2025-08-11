@@ -1,6 +1,7 @@
 import styles from "@/constants/styles";
-import { ActivityIndicator, Animated, Image, Text, View } from "react-native";
+import { Animated, Image, Text, View } from "react-native";
 import LottieView from "lottie-react-native";
+import searchAnimation from "@/assets/search-animation.json";
 
 const LoadingScreen = ({ imageUri }: { imageUri: string }) => (
   <Animated.View style={styles.centeredContainer}>
@@ -9,7 +10,7 @@ const LoadingScreen = ({ imageUri }: { imageUri: string }) => (
     </View>
 
     <LottieView
-      source={require("@/assets/search-animation.json")}
+      source={searchAnimation}
       autoPlay
       loop
       style={{ height: 100, width: 100, margin: 10 }}

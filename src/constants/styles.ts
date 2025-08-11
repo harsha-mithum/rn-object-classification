@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
   homeContainer: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-evenly",
     padding: 16,
   },
   centeredContainer: {
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 32,
+    marginBottom: 16,
     position: "relative",
   },
   title: {

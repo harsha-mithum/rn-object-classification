@@ -5,29 +5,49 @@ import LoadingScreen from "@/screens/LoadingScreen";
 import ResultScreen from "@/screens/ResultScreen";
 import { classifyImage as classifyImageUtil } from "@/utils/imageClassifier";
 import { loadModel as loadModelUtil } from "@/utils/modelLoader";
-import { MobileNet } from "@tensorflow-models/mobilenet";
 import * as ImagePicker from "expo-image-picker";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useReducer } from "react";
 import { Alert, SafeAreaView, StatusBar } from "react-native";
-const App = () => {
-  const [view, setView] = useState("home");
-  const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
-  const [results, setResults] = useState<
-    { className: string; probability: number }[]
-  >([]);
-  const [error, setError] = useState<string | null>(null);
 
-  const [isTfReady, setIsTfReady] = useState(false);
-  const [model, setModel] = useState<MobileNet | null>(null);
+const initialState = {
+  view: "home",
+  image: null,
+  results: [],
+  error: null,
+  isTfReady: false,
+  model: null,
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "SET_VIEW":
+      return { ...state, view: action.payload };
+    case "SET_IMAGE":
+      return { ...state, image: action.payload, error: null };
+    case "SET_RESULTS":
+      return { ...state, results: action.payload };
+    case "SET_ERROR":
+      return { ...state, error: action.payload, view: "home" };
+    case "INITIALIZE_MODEL":
+      return { ...state, model: action.payload, isTfReady: true };
+    case "RESET":
+      return { ...initialState, model: state.model, isTfReady: state.isTfReady };
+    default:
+      return state;
+  }
+};
+
+const App = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { view, image, results, error, isTfReady, model } = state;
 
   const initialize = useCallback(async () => {
     try {
       const loadedModel = await loadModelUtil();
-      setModel(loadedModel);
-      setIsTfReady(true);
+      dispatch({ type: "INITIALIZE_MODEL", payload: loadedModel });
     } catch (error) {
       console.error("Error loading model: ", error);
-      setError("Could not load model.");
+      dispatch({ type: "SET_ERROR", payload: "Could not load model." });
     }
   }, []);
 
@@ -35,18 +55,41 @@ const App = () => {
     initialize();
   }, [initialize]);
 
-  useEffect(() => {
-    if (image?.uri) {
-      handleImageClassification();
+  const handleImageClassification = useCallback(async () => {
+    if (!image || !model) {
+      Alert.alert("Image processing failed. Please try again.");
+      return;
     }
-  }, [image]);
+
+    dispatch({ type: "SET_VIEW", payload: "loading" });
+    dispatch({ type: "SET_RESULTS", payload: [] });
+
+    try {
+      const predictions = await classifyImageUtil(model, image);
+      dispatch({ type: "SET_RESULTS", payload: predictions });
+      dispatch({ type: "SET_VIEW", payload: "result" });
+    } catch (error) {
+      console.error("Error classifying image: ", error);
+      dispatch({ type: "SET_ERROR", payload: "Could not classify image." });
+    }
+  }, [image, model]);
+
+  useEffect(() => {
+    if (image?.uri && model) {
+      handleImageClassification();
+    } else if (image?.uri) {
+      dispatch({ type: "SET_VIEW", payload: "loading" });
+    } else {
+      dispatch({ type: "SET_VIEW", payload: "home" });
+    }
+  }, [image, model, handleImageClassification]);
 
   const handleImageSelect = (source: string) => {
     if (source === "gallery") {
       pickImage();
     }
     if (source === "camera") {
-      setView("camera");
+      dispatch({ type: "SET_VIEW", payload: "camera" });
     }
   };
 
@@ -59,43 +102,16 @@ const App = () => {
       });
 
       if (!result.canceled) {
-        setImage(result.assets[0]);
-        setError(null);
+        dispatch({ type: "SET_IMAGE", payload: result.assets[0] });
       }
     } catch (error) {
       console.error("Image picking failed:", error);
-      setError("Could not select image.");
-      setView("home");
-    }
-  };
-
-  const handleImageClassification = async () => {
-    if (!image) {
-      Alert.alert("Image processing failed. Please try again.");
-      return;
-    }
-
-    setView("loading");
-    setResults([]);
-
-    try {
-      if (!model) await initialize();
-
-      const predictions = await classifyImageUtil(model, image);
-      setResults(predictions);
-      setView("result");
-    } catch (error) {
-      console.error("Error classifying image: ", error);
-      setError("Could not classify image.");
-      setView("home");
+      dispatch({ type: "SET_ERROR", payload: "Could not select image." });
     }
   };
 
   const handleReset = useCallback(() => {
-    setView("home");
-    setImage(null);
-    setResults([]);
-    setError(null);
+    dispatch({ type: "RESET" });
   }, []);
 
   const renderView = () => {
@@ -105,9 +121,9 @@ const App = () => {
           <CameraScreen
             initialFacing="back"
             onCapture={(capturedImage) => {
-              setImage(capturedImage);
-              setError(null);
+              dispatch({ type: "SET_IMAGE", payload: capturedImage });
             }}
+            onReset={handleReset}
           />
         );
       case "loading":
@@ -122,13 +138,7 @@ const App = () => {
         );
       case "home":
       default:
-        return (
-          <HomeScreen
-            onImageSelect={handleImageSelect}
-            error={error}
-            isTfReady={isTfReady}
-          />
-        );
+        return <HomeScreen onImageSelect={handleImageSelect} error={error} />;
     }
   };
 
